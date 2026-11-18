@@ -1,4 +1,6 @@
+from contextlib import asynccontextmanager
 from html import escape
+from typing import AsyncIterator
 from urllib.parse import parse_qs
 import secrets
 import sqlite3
@@ -8,15 +10,16 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from .db import connect, init_db, now, verify_password
 
-app = FastAPI(title="Employee Support Tickets")
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    init_db()
+    yield
+
+
+app = FastAPI(title="Employee Support Tickets", lifespan=lifespan)
 CATEGORIES = ("Hardware", "Software", "Network", "Access", "Other")
 PRIORITIES = ("Low", "Medium", "High")
 STATUSES = ("Open", "In Progress", "Resolved", "Closed")
-
-
-@app.on_event("startup")
-def startup() -> None:
-    init_db()
 
 
 def page(content: str, title: str = "Employee Support Tickets", error: str = "", status_code: int = 200) -> HTMLResponse:
