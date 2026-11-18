@@ -1,4 +1,5 @@
-﻿import sys
+import secrets
+import sys
 from pathlib import Path
 
 import pytest
@@ -19,13 +20,13 @@ def client(tmp_path, monkeypatch):
 
 
 def sign_in(client, username):
-    # The app creates made-up credentials on first start. Tests use a fixed
-    # local-only password hash so the same behavior can be checked repeatedly.
+    # Use a fresh made-up password for each test login.
+    password = secrets.token_urlsafe(16)
     with db.connect() as conn:
         user = conn.execute("SELECT id FROM users WHERE username=?", (username,)).fetchone()
         if user:
-            conn.execute("UPDATE users SET password_hash=? WHERE id=?", (db.hash_password("sample-pass"), user["id"]))
-    response = client.post("/login", data={"username": username, "password": "sample-pass"}, follow_redirects=False)
+            conn.execute("UPDATE users SET password_hash=? WHERE id=?", (db.hash_password(password), user["id"]))
+    response = client.post("/login", data={"username": username, "password": password}, follow_redirects=False)
     assert response.status_code == 303
     return response
 
