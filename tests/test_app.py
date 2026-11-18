@@ -32,7 +32,7 @@ def sign_in(client, username):
 
 
 def test_bad_password_rejected(client):
-    response = client.post("/login", data={"username": "ravi", "password": "wrong"})
+    response = client.post("/login", data={"username": "ravi", "password": secrets.token_urlsafe(16)})
     assert response.status_code == 200
     assert "incorrect" in response.text
 
