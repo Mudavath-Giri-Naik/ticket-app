@@ -1,0 +1,10 @@
+﻿__pycache__/
+*.py[cod]
+.venv/
+.env
+*.db
+.demo_credentials.txt
+.pytest_cache/
+playwright-report/
+test-results/
+screenshots/
